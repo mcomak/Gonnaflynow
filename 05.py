@@ -48,25 +48,38 @@ td_list = [j for i, j in enumerate(td_list) if i % 11 not in [2,10]]
 # Iterate through the index of the columns
 
 for i, value in enumerate(td_list):
-    if (i % 9) == 0:
-        df.loc[i//9, "Tarih"] = value
-    elif (i % 9) == 1:
-        df.loc[i//9, "Planlanan"] = value
-    elif (i % 9) == 2:
-        df.loc[i//9, "Tahmini"] = value
-    elif (i % 9) == 3:
-        df.loc[i//9, "Havayolu"] = value
-    elif (i % 9) == 4:
-        df.loc[i//9, "Uçuş"] = value
-    elif (i % 9) == 5:
-        df.loc[i//9, "Çıkış"] = value
-    elif (i % 9) == 6:
-        df.loc[i//9, "Varış"] = value
-    elif (i % 9) == 7:
-        df.loc[i//9, "Kapı"] = value
-    elif (i % 9) == 8:
-        df.loc[i//9, "Durum"] = value
+        if (i % 9) == 0:
+            df.loc[i//9, "Tarih"] = value
+        elif (i % 9) == 1:
+            df.loc[i//9, "Planlanan"] = value
+        elif (i % 9) == 2:
+            df.loc[i//9, "Tahmini"] = value
+        elif (i % 9) == 3:
+            df.loc[i//9, "Havayolu"] = value
+        elif (i % 9) == 4:
+            df.loc[i//9, "Uçuş"] = value
+        elif (i % 9) == 5:
+            df.loc[i//9, "Çıkış"] = value
+        elif (i % 9) == 6:
+            df.loc[i//9, "Varış"] = value
+        elif (i % 9) == 7:
+            df.loc[i//9, "Kapı"] = value
+        elif (i % 9) == 8:
+            df.loc[i//9, "Durum"] = value
 
 pd.options.display.max_columns = None
 pd.options.display.width = None
-df.head()
+print(df)
+
+# Timestamp column adding
+
+df["Tarih"] = pd.to_datetime(df['Tarih'], format='%Y-%m-%')
+df['Planlanan'] = pd.to_datetime(df['Planlanan'], format='%H:%M')
+df['Tahmini'] = pd.to_datetime(df['Tahmini'], format='%H:%M')
+df['timestamp'] = df.apply(lambda row: row['Tarih'] + row['Planlanan'].time(), axis=1)
+df['timestamp_Planlanan'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Planlanan'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
+df['timestamp_Tahmini'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Tahmini'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
+df.info()
+filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
+df['time_diff'] = df['timestamp_Tahmini'] - df['timestamp_Planlanan']
+df["Planlanan"]
