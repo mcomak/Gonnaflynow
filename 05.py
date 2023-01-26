@@ -1,10 +1,14 @@
 # how to accept cookie consent with selenium python
 
+# libraries & modules & configs
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import pandas as pd
+pd.options.display.max_columns = None
+pd.options.display.width = None
+
 
 # Set the location of our chrome driver
 s = Service('/Users/Mertcan/Documents/DataOps/DEng/web_scratching/chromedriver')
@@ -67,19 +71,56 @@ for i, value in enumerate(td_list):
         elif (i % 9) == 8:
             df.loc[i//9, "Durum"] = value
 
-pd.options.display.max_columns = None
-pd.options.display.width = None
-print(df)
 
 # Timestamp column adding
 
-df["Tarih"] = pd.to_datetime(df['Tarih'], format='%Y-%m-%')
-df['Planlanan'] = pd.to_datetime(df['Planlanan'], format='%H:%M')
-df['Tahmini'] = pd.to_datetime(df['Tahmini'], format='%H:%M')
-df['timestamp'] = df.apply(lambda row: row['Tarih'] + row['Planlanan'].time(), axis=1)
-df['timestamp_Planlanan'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Planlanan'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
-df['timestamp_Tahmini'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Tahmini'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
-df.info()
+# df["Tarih"] = pd.to_datetime(df['Tarih'], format='%d.%m.%Y')
+# df['Planlanan'] = pd.to_datetime(df['Planlanan'], format='%H:%M')
+# df['Tahmini'] = pd.to_datetime(df['Tahmini'], format='%H:%M')
+# df['timestamp'] = df.apply(lambda row: row['Tarih'] + row['Planlanan'].time(), axis=1)
+# df['timestamp_Planlanan'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Planlanan'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
+# df['timestamp_Tahmini'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Tahmini'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
+# df.info()
+# filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
+# df['rotar'] = df['timestamp_Tahmini'] - df['timestamp_Planlanan']
+#
+# df["Tarih"] = pd.to_datetime(df['Tarih'], format='%d.%m.%Y')
+
+
+# convert_date (df1,'Planlanan')
+# convert_date (df1, 'Tahmini')
+# convert_date (df1, 'Tarih', format = '%d.%m.%Y')
+#
+#
+# df['time_difference'] = df['end_time'] - df['start_time']
+# df1['rötar'] = df1['Tahmini'] - df1['Planlanan']
+
+
+# converting date form object dtype
+# def convert_date(df, col, format = '%H:%M'):
+#
+#     if format == '%H:%M':
+#         df[col] = pd.to_datetime(df[col], format=format).dt.time
+#     else:
+#         df[col] = pd.to_datetime(df[col], format=format)
+#     return df
+
+# adding day to morrow delays
+def add_day(value):
+    if value < pd.Timedelta(days=0):
+        return value + pd.Timedelta(days=1)
+    else:
+        return value
+
+# delay calculation
+def rotar_calc(df,col1,col2,col3 = "Estimation",col4 = "Planned"):
+    df[col3] = pd.to_datetime(df[col1], format='%H:%M')
+    df[col4] = pd.to_datetime(df[col2], format='%H:%M')
+    df['rötar'] = df1[col4] - df[col3]
+    df = df.drop(columns=[col3,col4])
+    df['rötar'] = df['rötar'].apply(add_day)
+    return df
+
+df = rotar_calc(df,'Planlanan','Tahmini')
 filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
-df['time_diff'] = df['timestamp_Tahmini'] - df['timestamp_Planlanan']
-df["Planlanan"]
+
