@@ -1,3 +1,4 @@
+#Pyshadow for DOM element finding
 from selenium import webdriver
 from pyshadow.main import Shadow
 from webdriver_manager.chrome import ChromeDriverManager
