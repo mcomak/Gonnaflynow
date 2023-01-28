@@ -2,47 +2,46 @@
 
 # libraries & modules & configs
 from selenium import webdriver
+from pyshadow.main import Shadow
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import pandas as pd
+import time
 pd.options.display.max_columns = None
 pd.options.display.width = None
 
-
 # Set the location of our chrome driver
 s = Service('/Users/Mertcan/Documents/DataOps/DEng/web_scratching/chromedriver')
-chromeOptions = Options()
-chromeOptions.headless = False
 
-driver = webdriver.Chrome(service= s, options=chromeOptions)
+# Initialize the webdriver
+driver = webdriver.Chrome(ChromeDriverManager().install())
+shadow = Shadow(driver)
 driver.get("https://www.frankfurt-airport.com/en/flights-and-transfer/departures.html")
 
-# wait 5 sec to open the page before find_elemets
-driver.implicitly_wait(5)
-
-
-# Google-cookies bypass
-try:
-    # accept button finding with by methode:
-    consent_button = driver.find_element(By.XPATH, "//button[contains(@class, 'sc-eDvSVe dmPTtj') and 'Accept all']")
-
-    # click accept all button for cookies automatically
-    consent_button.click()
-except:
-    pass
+time.sleep(5)
+button = shadow.find_element("button[data-testid='uc-accept-all-button'][class='sc-eDvSVe dmPTtj']")
+# Interact with the button
+text = button.text # get text of the button
+button.click() # click the button
 
 # table column names finding
 th_elements = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//thead[@class="fra-e-table__header"]//tr//th')
 th_list = [th.text for th in th_elements]
 
 
+
 df = pd.DataFrame(columns=th_list)
-df.columns
 df = df.assign(Date=[])
 df.insert(0,"Date",df.pop("Date"))
 df = df.assign(Estimation=[])
 df.insert(3,"Estimation",df.pop("Estimation"))
+# Find empty column names
+empty_cols = [col for col in df.columns if col.strip() == '']
+
+# Drop empty column names
+df.drop(empty_cols, axis=1, inplace=True)
+
 
 
 def catch_date():
@@ -55,32 +54,31 @@ def catch_date():
 td_elements = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr[@class="fra-m-flights__row"]//td')
 
 td_list = [td.text for td in td_elements]
+td_list = [j for i, j in enumerate(td_list) if i % 8 not in [0,7]]
 
 for i, value in enumerate(td_list):
     # catching dates and place in Date column
-    df.loc[i//9 , "Date"] = catch_date()
+    df.loc[i//6 , "Date"] = catch_date()
 
-    # Distruputing other table-values to columns
-    if (i % 9) == 1:
+    # Distrupute other table-values to columns
+    if (i % 6) == 0:
         if len(value.split()) > 1:
             val_list = value.split('\n')
-            df.loc[i//9, "Departure"] = value[0]
-            df.loc[i // 9, "Estimation"] = value[1]
+            df.loc[i // 6, "Departure"] = val_list[0]
+            df.loc[i // 6, "Estimation"] = val_list[1]
         else:
-            df.loc[i // 9, "Departure"] = value
-    elif (i % 9) == 2:
-        df.loc[i//9, "Destination, via"] = value
-    elif (i % 9) == 3:
-        df.loc[i//9, "Flight"] = value
-    elif (i % 9) == 4:
-        df.loc[i//9, "State"] = value
-    elif (i % 9) == 5:
-        df.loc[i//9, "Codeshare	"] = value
-    elif (i % 9) == 6:
-        df.loc[i//9, "Terminal, Halle, Gate, Check-in"] = value
-    elif (i % 9) == 7:
-        df.loc[i//9, ""] = value
-
+            df.loc[i // 6, "Departure"] = value
+            df.loc[i // 6, "Estimation"] = value
+    elif (i % 6) == 1:
+        df.loc[i//6, "Destination, via"] = value
+    elif (i % 6) == 2:
+        df.loc[i//6, "Flight"] = value
+    elif (i % 6) == 3:
+        df.loc[i//6, "State"] = value
+    elif (i % 6) == 4:
+        df.loc[i//6, "Codeshare"] = value
+    elif (i % 6) == 5:
+        df.loc[i//6, "Terminal, Halle, Gate, Check-in"] = value
 
 
 driver.quit()
