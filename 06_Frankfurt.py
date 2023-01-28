@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 import pandas as pd
 import time
+from datetime import datetime
 pd.options.display.max_columns = None
 pd.options.display.width = None
 
@@ -42,23 +43,32 @@ empty_cols = [col for col in df.columns if col.strip() == '']
 # Drop empty column names
 df.drop(empty_cols, axis=1, inplace=True)
 
+def catch_date(date_string):
+    try:
+        datetime.strptime(date_string, '%A, %d %B %Y')
+        return True
+    except ValueError:
+        return False
+
+# td elements with dates
+td_with_dates = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td')
+# td elements w/o dates
+td_wo_dates = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr[@class="fra-m-flights__row"]//td')
+
+td_list_with_dates = [td.text for td in td_with_dates]
+td_list_wo_dates = [td.text for td in td_wo_dates]
+td_list_wo_dates = [j for i, j in enumerate(td_list_wo_dates) if i % 8 not in [0,7]]
+
+for i,j in enumerate(td_list):
+    if catch_date(j) == False :
+        if
 
 
-def catch_date():
-    td_date_element = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td[@class="fra-m-flights__td-date"]//time')
-    date_element = [dt.text.split(', ')[1] for dt in td_date_element]
-    return date_element[0]
-
-
-# # to read the text from all td elements
-td_elements = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr[@class="fra-m-flights__row"]//td')
-
-td_list = [td.text for td in td_elements]
-td_list = [j for i, j in enumerate(td_list) if i % 8 not in [0,7]]
 
 for i, value in enumerate(td_list):
     # catching dates and place in Date column
-    df.loc[i//6 , "Date"] = catch_date()
+    if catch_date(value) == True:
+
 
     # Distrupute other table-values to columns
     if (i % 6) == 0:
@@ -80,49 +90,6 @@ for i, value in enumerate(td_list):
     elif (i % 6) == 5:
         df.loc[i//6, "Terminal, Halle, Gate, Check-in"] = value
 
-
-driver.quit()
-
-# td_list = [j for i, j in enumerate(td_list) if i % 11 not in [2,10]]
-
-# Iterate through the index of the columns
-
-
-
-
-# Timestamp column adding
-
-# df["Tarih"] = pd.to_datetime(df['Tarih'], format='%d.%m.%Y')
-# df['Planlanan'] = pd.to_datetime(df['Planlanan'], format='%H:%M')
-# df['Tahmini'] = pd.to_datetime(df['Tahmini'], format='%H:%M')
-# df['timestamp'] = df.apply(lambda row: row['Tarih'] + row['Planlanan'].time(), axis=1)
-# df['timestamp_Planlanan'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Planlanan'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
-# df['timestamp_Tahmini'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Tahmini'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
-# df.info()
-# filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
-# df['rotar'] = df['timestamp_Tahmini'] - df['timestamp_Planlanan']
-#
-# df["Tarih"] = pd.to_datetime(df['Tarih'], format='%d.%m.%Y')
-
-
-# convert_date (df1,'Planlanan')
-# convert_date (df1, 'Tahmini')
-# convert_date (df1, 'Tarih', format = '%d.%m.%Y')
-#
-#
-# df['time_difference'] = df['end_time'] - df['start_time']
-# df1['rötar'] = df1['Tahmini'] - df1['Planlanan']
-
-
-# converting date form object dtype
-# def convert_date(df, col, format = '%H:%M'):
-#
-#     if format == '%H:%M':
-#         df[col] = pd.to_datetime(df[col], format=format).dt.time
-#     else:
-#         df[col] = pd.to_datetime(df[col], format=format)
-#     return df
-
 # adding day to morrow delays
 def add_day(value):
     if value < pd.Timedelta(days=0):
@@ -141,4 +108,7 @@ def rotar_calc(df,col1,col2,col3 = "Estimation",col4 = "Planned"):
 
 df = rotar_calc(df,'Planlanan','Tahmini')
 filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
+
+
+driver.quit()
 
