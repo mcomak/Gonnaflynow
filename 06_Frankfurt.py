@@ -39,11 +39,16 @@ th_list = [th.text for th in th_elements]
 
 df = pd.DataFrame(columns=th_list)
 df.columns
-df= df.assign(Date=[])
+df = df.assign(Date=[])
 df.insert(0,"Date",df.pop("Date"))
+df = df.assign(Estimation=[])
+df.insert(3,"Estimation",df.pop("Estimation"))
 
-td_date_element = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td[@class="fra-m-flights__td-date"]//time')
-date_element = [dt.text.split(', ')[1] for dt in td_date_element]
+
+def catch_date():
+    td_date_element = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td[@class="fra-m-flights__td-date"]//time')
+    date_element = [dt.text.split(', ')[1] for dt in td_date_element]
+    return date_element[0]
 
 
 # # to read the text from all td elements
@@ -52,24 +57,31 @@ td_elements = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbo
 td_list = [td.text for td in td_elements]
 
 for i, value in enumerate(td_list):
-        if (i % 9) == 0:
-            df.loc[i//9, "Tarih"] = value
-        elif (i % 9) == 1:
-            df.loc[i//9, "Planlanan"] = value
-        elif (i % 9) == 2:
-            df.loc[i//9, "Tahmini"] = value
-        elif (i % 9) == 3:
-            df.loc[i//9, "Havayolu"] = value
-        elif (i % 9) == 4:
-            df.loc[i//9, "Uçuş"] = value
-        elif (i % 9) == 5:
-            df.loc[i//9, "Çıkış"] = value
-        elif (i % 9) == 6:
-            df.loc[i//9, "Varış"] = value
-        elif (i % 9) == 7:
-            df.loc[i//9, "Kapı"] = value
-        elif (i % 9) == 8:
-            df.loc[i//9, "Durum"] = value
+    # catching dates and place in Date column
+    df.loc[i//9 , "Date"] = catch_date()
+
+    # Distruputing other table-values to columns
+    if (i % 9) == 1:
+        if len(value.split()) > 1:
+            val_list = value.split('\n')
+            df.loc[i//9, "Departure"] = value[0]
+            df.loc[i // 9, "Estimation"] = value[1]
+        else:
+            df.loc[i // 9, "Departure"] = value
+    elif (i % 9) == 2:
+        df.loc[i//9, "Destination, via"] = value
+    elif (i % 9) == 3:
+        df.loc[i//9, "Flight"] = value
+    elif (i % 9) == 4:
+        df.loc[i//9, "State"] = value
+    elif (i % 9) == 5:
+        df.loc[i//9, "Codeshare	"] = value
+    elif (i % 9) == 6:
+        df.loc[i//9, "Terminal, Halle, Gate, Check-in"] = value
+    elif (i % 9) == 7:
+        df.loc[i//9, ""] = value
+
+
 
 driver.quit()
 
