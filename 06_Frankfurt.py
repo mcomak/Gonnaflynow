@@ -37,58 +37,74 @@ df = df.assign(Date=[])
 df.insert(0,"Date",df.pop("Date"))
 df = df.assign(Estimation=[])
 df.insert(3,"Estimation",df.pop("Estimation"))
-# Find empty column names
-empty_cols = [col for col in df.columns if col.strip() == '']
+df.columns = ['Date', 'Logo', 'Departure', 'Estimation', 'Destination, via',
+       'Flight', 'State', 'Codeshare', 'Terminal, Halle, Gate, Check-in',
+       'Click']
 
-# Drop empty column names
-df.drop(empty_cols, axis=1, inplace=True)
+# # Find empty column names
+# empty_cols = [col for col in df.columns if col.strip() == '']
+#
+# # Drop empty column names
+# df.drop(empty_cols, axis=1, inplace=True)
 
-def catch_date(date_string):
+def check_date(date_string):
     try:
         datetime.strptime(date_string, '%A, %d %B %Y')
         return True
     except ValueError:
         return False
 
-# td elements with dates
-td_with_dates = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td')
-# td elements w/o dates
-td_wo_dates = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr[@class="fra-m-flights__row"]//td')
+def convert_date(date_string):
+    date_obj = datetime.strptime(date_string, '%A, %d %B %Y')
+    date_obj = date_obj.strftime('%d-%m-%Y')
+    return date_obj
 
-td_list_with_dates = [td.text for td in td_with_dates]
-td_list_wo_dates = [td.text for td in td_wo_dates]
-td_list_wo_dates = [j for i, j in enumerate(td_list_wo_dates) if i % 8 not in [0,7]]
+# td elements with dates
+td_list = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td')
+td_list = [td.text for td in td_list]
+
+# insert dates in td_list
+for i,j in enumerate(td_list):
+    if (i % 9) == 0:
+        if check_date(j) == False:
+           td_list.insert(i, td_list[( i // 9 - 1 ) * 9])
 
 for i,j in enumerate(td_list):
-    if catch_date(j) == False :
-        if
-
+    if i % 9 == 0:
+        td_list[i] = convert_date(j)
 
 
 for i, value in enumerate(td_list):
     # catching dates and place in Date column
-    if catch_date(value) == True:
+    if check_date(value) == True:
 
 
-    # Distrupute other table-values to columns
-    if (i % 6) == 0:
+# Distrupute other table-values to columns
+for i,value in enumerate(td_list):
+    if (i % 9) == 0:
+        df.loc[i // 9, "Date"] = value
+    elif (i % 9) == 1:
+        df.loc[i // 9, "Logo"] = value
+    elif (i % 9) == 2:
         if len(value.split()) > 1:
             val_list = value.split('\n')
-            df.loc[i // 6, "Departure"] = val_list[0]
-            df.loc[i // 6, "Estimation"] = val_list[1]
+            df.loc[i // 9, "Departure"] = val_list[0]
+            df.loc[i // 9, "Estimation"] = val_list[1]
         else:
-            df.loc[i // 6, "Departure"] = value
-            df.loc[i // 6, "Estimation"] = value
-    elif (i % 6) == 1:
-        df.loc[i//6, "Destination, via"] = value
-    elif (i % 6) == 2:
-        df.loc[i//6, "Flight"] = value
-    elif (i % 6) == 3:
-        df.loc[i//6, "State"] = value
-    elif (i % 6) == 4:
-        df.loc[i//6, "Codeshare"] = value
-    elif (i % 6) == 5:
-        df.loc[i//6, "Terminal, Halle, Gate, Check-in"] = value
+            df.loc[i // 9, "Departure"] = value
+            df.loc[i // 9, "Estimation"] = value
+    elif (i % 9) == 3:
+        df.loc[i//9, "Destination, via"] = value
+    elif (i % 9) == 4:
+        df.loc[i//9, "Flight"] = value
+    elif (i % 9) == 5:
+        df.loc[i//9, "State"] = value
+    elif (i % 9) == 6:
+        df.loc[i//9, "Codeshare"] = value
+    elif (i % 9) == 7:
+        df.loc[i//9, "Terminal, Halle, Gate, Check-in"] = value
+    elif (i % 9) == 8:
+        df.loc[i//9, "Click"] = value
 
 # adding day to morrow delays
 def add_day(value):
