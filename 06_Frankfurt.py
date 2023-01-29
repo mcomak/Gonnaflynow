@@ -37,7 +37,7 @@ df = df.assign(Date=[])
 df.insert(0,"Date",df.pop("Date"))
 df = df.assign(Estimation=[])
 df.insert(3,"Estimation",df.pop("Estimation"))
-df.columns = ['Date', 'Logo', 'Departure', 'Estimation', 'Destination, via',
+df.columns = ['Date', 'Airline', 'Departure', 'Estimation', 'Destination, via',
        'Flight', 'State', 'Codeshare', 'Terminal, Halle, Gate, Check-in',
        'Click']
 
@@ -63,6 +63,10 @@ def convert_date(date_string):
 td_list = driver.find_elements(By.XPATH, '//table[@class="fra-e-table"]//tbody[@class="fra-e-table__body"]//tr//td')
 td_list = [td.text for td in td_list]
 
+# Capturing from Image:
+img_elements = driver.find_elements(By.XPATH, "//td[@class='fra-m-flights__td-airline']/img")
+img_alt_list = [img_element.get_attribute('alt') for img_element in img_elements]
+
 # insert dates in td_list
 for i,j in enumerate(td_list):
     if (i % 9) == 0:
@@ -78,7 +82,7 @@ for i,value in enumerate(td_list):
     if (i % 9) == 0:
         df.loc[i // 9, "Date"] = value
     elif (i % 9) == 1:
-        df.loc[i // 9, "Logo"] = value
+        df.loc[i // 9, "Airline"] = img_alt_list[i // 9]
     elif (i % 9) == 2:
         if len(value.split()) > 1:
             val_list = value.split('\n')
