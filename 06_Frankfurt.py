@@ -73,13 +73,7 @@ for i,j in enumerate(td_list):
     if i % 9 == 0:
         td_list[i] = convert_date(j)
 
-
-for i, value in enumerate(td_list):
-    # catching dates and place in Date column
-    if check_date(value) == True:
-
-
-# Distrupute other table-values to columns
+# Distribute other table-values to columns
 for i,value in enumerate(td_list):
     if (i % 9) == 0:
         df.loc[i // 9, "Date"] = value
@@ -106,25 +100,7 @@ for i,value in enumerate(td_list):
     elif (i % 9) == 8:
         df.loc[i//9, "Click"] = value
 
-# adding day to morrow delays
-def add_day(value):
-    if value < pd.Timedelta(days=0):
-        return value + pd.Timedelta(days=1)
-    else:
-        return value
 
-# delay calculation
-def rotar_calc(df,col1,col2,col3 = "Estimation",col4 = "Planned"):
-    df[col3] = pd.to_datetime(df[col1], format='%H:%M')
-    df[col4] = pd.to_datetime(df[col2], format='%H:%M')
-    df['rötar'] = df1[col4] - df[col3]
-    df = df.drop(columns=[col3,col4])
-    df['rötar'] = df['rötar'].apply(add_day)
-    return df
-
-df = rotar_calc(df,'Planlanan','Tahmini')
-filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
-
-
+print(df)
 driver.quit()
 
