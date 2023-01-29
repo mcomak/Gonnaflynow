@@ -74,40 +74,6 @@ for i, value in enumerate(td_list):
         elif (i % 9) == 8:
             df.loc[i//9, "Durum"] = value
 
-
-# Timestamp column adding
-
-# df["Tarih"] = pd.to_datetime(df['Tarih'], format='%d.%m.%Y')
-# df['Planlanan'] = pd.to_datetime(df['Planlanan'], format='%H:%M')
-# df['Tahmini'] = pd.to_datetime(df['Tahmini'], format='%H:%M')
-# df['timestamp'] = df.apply(lambda row: row['Tarih'] + row['Planlanan'].time(), axis=1)
-# df['timestamp_Planlanan'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Planlanan'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
-# df['timestamp_Tahmini'] = pd.to_datetime(df['Tarih'].dt.strftime('%Y-%m-%d') + ' ' + df['Tahmini'].dt.strftime('%H:%M:%S'), format='%Y-%m-%d %H:%M:%S')
-# df.info()
-# filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
-# df['rotar'] = df['timestamp_Tahmini'] - df['timestamp_Planlanan']
-#
-# df["Tarih"] = pd.to_datetime(df['Tarih'], format='%d.%m.%Y')
-
-
-# convert_date (df1,'Planlanan')
-# convert_date (df1, 'Tahmini')
-# convert_date (df1, 'Tarih', format = '%d.%m.%Y')
-#
-#
-# df['time_difference'] = df['end_time'] - df['start_time']
-# df1['rötar'] = df1['Tahmini'] - df1['Planlanan']
-
-
-# converting date form object dtype
-# def convert_date(df, col, format = '%H:%M'):
-#
-#     if format == '%H:%M':
-#         df[col] = pd.to_datetime(df[col], format=format).dt.time
-#     else:
-#         df[col] = pd.to_datetime(df[col], format=format)
-#     return df
-
 # adding day to morrow delays
 def add_day(value):
     if value < pd.Timedelta(days=0):
@@ -126,4 +92,8 @@ def rotar_calc(df,col1,col2,col3 = "Estimation",col4 = "Planned"):
 
 df = rotar_calc(df,'Planlanan','Tahmini')
 filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
+
+print(filtered_df)
+
+driver.quit()
 
