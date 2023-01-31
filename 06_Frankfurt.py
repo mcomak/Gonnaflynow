@@ -104,7 +104,13 @@ for i,value in enumerate(td_list):
     elif (i % 9) == 8:
         df.loc[i//9, "Click"] = value
 
-
 print(df)
+
+
+# Data Manipulation
+
+
+
+
 driver.quit()
 

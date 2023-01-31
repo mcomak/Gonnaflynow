@@ -17,7 +17,7 @@ chromeOptions.headless = False
 
 # Url to scrape
 driver = webdriver.Chrome(service= s, options=chromeOptions)
-driver.get("https://www.istairport.com/tr/yolcu/ucus-bilgileri/giden-ucuslar")
+driver.get("https://www.istairport.com/en/passenger/flight/departure?locale=en")
 
 # wait 5 sec to open the page before find_elemets
 driver.implicitly_wait(5)
@@ -39,11 +39,9 @@ th_elements = driver.find_elements(By.XPATH, "//th[@class= 'border-top-0 text-me
 th_list = [td.text for td in th_elements]
 
 df = pd.DataFrame(columns=th_list)
-df.columns
 
 # # to read the text from all td elements
 td_elements = driver.find_elements(By.XPATH, "//td")
-len(td_elements)
 # for index, td in enumerate(td_elements):
 #     #print(index,td.text)
 #     df.loc[index // 11, index % 11] = td.text
@@ -56,23 +54,23 @@ td_list = [j for i, j in enumerate(td_list) if i % 11 not in [2,10]]
 # Iterate through the index of the columns
 for i, value in enumerate(td_list):
         if (i % 9) == 0:
-            df.loc[i//9, "Tarih"] = value
+            df.loc[i//9, "Date"] = value
         elif (i % 9) == 1:
-            df.loc[i//9, "Planlanan"] = value
+            df.loc[i//9, "Planned"] = value
         elif (i % 9) == 2:
-            df.loc[i//9, "Tahmini"] = value
+            df.loc[i//9, "Estimated"] = value
         elif (i % 9) == 3:
-            df.loc[i//9, "Havayolu"] = value
+            df.loc[i//9, "Airline"] = value
         elif (i % 9) == 4:
-            df.loc[i//9, "Uçuş"] = value
+            df.loc[i//9, "Flight"] = value
         elif (i % 9) == 5:
-            df.loc[i//9, "Çıkış"] = value
+            df.loc[i//9, "Departure"] = value
         elif (i % 9) == 6:
-            df.loc[i//9, "Varış"] = value
+            df.loc[i//9, "Arrival"] = value
         elif (i % 9) == 7:
-            df.loc[i//9, "Kapı"] = value
+            df.loc[i//9, "Gate"] = value
         elif (i % 9) == 8:
-            df.loc[i//9, "Durum"] = value
+            df.loc[i//9, "Status"] = value
 
 # adding day to morrow delays
 def add_day(value):
@@ -82,16 +80,16 @@ def add_day(value):
         return value
 
 # delay calculation
-def rotar_calc(df,col1,col2,col3 = "Estimation",col4 = "Planned"):
+def rotar_calc(df,col1,col2,col3 = "Estimated_2",col4 = "Planned_2"):
     df[col3] = pd.to_datetime(df[col1], format='%H:%M')
     df[col4] = pd.to_datetime(df[col2], format='%H:%M')
-    df['rötar'] = df[col4] - df[col3]
+    df['delay'] = df[col4] - df[col3]
     df = df.drop(columns=[col3,col4])
-    df['rötar'] = df['rötar'].apply(add_day)
+    df['delay'] = df['delay'].apply(add_day)
     return df
 
-df = rotar_calc(df,'Planlanan','Tahmini')
-filtered_df = df.query("Durum == 'Kalktı' | Durum == 'İptal'")
+df = rotar_calc(df,'Planned','Estimated')
+filtered_df = df.query("Status == 'Departed' | Status == 'Canceled'")
 
 print(filtered_df)
 
