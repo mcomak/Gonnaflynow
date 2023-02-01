@@ -13,7 +13,7 @@ pd.options.display.max_columns = None
 pd.options.display.width = None
 
 # Set the location of our chrome driver
-s = Service('/Users/Mertcan/Documents/DataOps/DEng/web_scratching/chromedriver')
+s = Service('/Users/Mertcan/Documents/DataOps/01_DEng/web_scratching/chromedriver')
 
 # Initialize the webdriver
 driver = webdriver.Chrome(ChromeDriverManager().install())
