@@ -42,10 +42,6 @@ df = pd.DataFrame(columns=th_list)
 
 # # to read the text from all td elements
 td_elements = driver.find_elements(By.XPATH, "//td")
-# for index, td in enumerate(td_elements):
-#     #print(index,td.text)
-#     df.loc[index // 11, index % 11] = td.text
-
 td_list = []
 [td_list.append(td.text) for td in td_elements]
 td_list = [j for i, j in enumerate(td_list) if i % 11 not in [2,10]]
