@@ -2,8 +2,6 @@ from selenium import webdriver
 from pyshadow.main import Shadow
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 import pandas as pd
 import time
 from datetime import datetime
@@ -97,7 +95,7 @@ class Scraper:
             # insert dates in td_list
             for i, j in enumerate(self.td_list):
                 if (i % 9) == 0:
-                    if self.check_date(j) == False:
+                    if not self.check_date(j):
                         self.td_list.insert(i, self.td_list[(i // 9 - 1) * 9])
             for i, j in enumerate(self.td_list):
                 if i % 9 == 0:
@@ -166,6 +164,6 @@ class Scraper:
         self.driver.quit()
 
 
-sc = Scraper(location='frankfurt')
+sc = Scraper(location='istanbul')
 sc.inject_to_df()
 sc.quit_driver()
