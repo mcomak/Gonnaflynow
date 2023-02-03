@@ -12,10 +12,6 @@ from datetime import datetime
 pd.options.display.max_columns = None
 pd.options.display.width = None
 
-# Set the location of our chrome driver
-s = Service('/Users/Mertcan/Documents/DataOps/01_DEng/web_scratching/chromedriver')
-
-# Initialize the webdriver
 driver = webdriver.Chrome(ChromeDriverManager().install())
 shadow = Shadow(driver)
 driver.get("https://www.frankfurt-airport.com/en/flights-and-transfer/departures.html")
@@ -82,7 +78,7 @@ for i,value in enumerate(td_list):
     if (i % 9) == 0:
         df.loc[i // 9, "Date"] = value
     elif (i % 9) == 1:
-        df.loc[i // 9, "Airline"] = img_alt_list[i // 9]
+        df.loc[i // 9, "Airline"] = str(df.loc[i//9,"Flight"]).split(' ')[0]
     elif (i % 9) == 2:
         if len(value.split()) > 1:
             val_list = value.split('\n')
@@ -103,6 +99,9 @@ for i,value in enumerate(td_list):
         df.loc[i//9, "Terminal, Halle, Gate, Check-in"] = value
     elif (i % 9) == 8:
         df.loc[i//9, "Click"] = value
+
+
+str(df.loc[i//9,"Flight"]).split(' ')[0]
 
 print(df)
 

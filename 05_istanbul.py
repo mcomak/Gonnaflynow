@@ -2,21 +2,17 @@
 
 # libraries & modules & configs
 from selenium import webdriver
+from pyshadow.main import Shadow
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 import pandas as pd
+import time
+from datetime import datetime
 pd.options.display.max_columns = None
 pd.options.display.width = None
 
-
-# Set the location of our chrome driver & chrome options
-s = Service('/Users/Mertcan/Documents/DataOps/DEng/web_scratching/chromedriver')
-chromeOptions = Options()
-chromeOptions.headless = False
-
-# Url to scrape
-driver = webdriver.Chrome(service= s, options=chromeOptions)
+driver = webdriver.Chrome(ChromeDriverManager().install())
 driver.get("https://www.istairport.com/en/passenger/flight/departure?locale=en")
 
 # wait 5 sec to open the page before find_elemets
@@ -46,6 +42,9 @@ td_list = []
 [td_list.append(td.text) for td in td_elements]
 td_list = [j for i, j in enumerate(td_list) if i % 11 not in [2,10]]
 
+# Capturing airline titles from Image:
+img_elements = driver.find_elements(By.XPATH, "//td[@class='not-mobile']/div[@class='airline-brand d-inline-block']/img")
+img_alt_list = [img_element.get_attribute('alt').split(' ') for img_element in img_elements]
 
 # Iterate through the index of the columns
 for i, value in enumerate(td_list):
@@ -56,7 +55,7 @@ for i, value in enumerate(td_list):
         elif (i % 9) == 2:
             df.loc[i//9, "Estimated"] = value
         elif (i % 9) == 3:
-            df.loc[i//9, "Airline"] = value
+            df.loc[i // 9, "Airline"] = img_alt_list[i // 9][0]
         elif (i % 9) == 4:
             df.loc[i//9, "Flight"] = value
         elif (i % 9) == 5:
