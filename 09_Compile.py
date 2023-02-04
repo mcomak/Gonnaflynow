@@ -75,7 +75,7 @@ class Scraper:
     # Assisting function for frankfurt date column
     def convert_date(self,date_string):
         self.date_obj = datetime.strptime(date_string, '%A, %d %B %Y')
-        self.date_obj = self.date_obj.strftime('%d-%m-%Y')
+        self.date_obj = self.date_obj.strftime('%d.%m.%Y')
         return self.date_obj
 
 
@@ -164,12 +164,40 @@ class Scraper:
                     self.df.loc[i // 9, "Terminal, Halle, Gate, Check-in"] = value
                 elif (i % 9) == 8:
                     self.df.loc[i // 9, "Click"] = value
+
+        self.delay_calc()
+        # Date datatype converting
+        self.date_convertor()
         return self.df
 
     def quit_driver(self):
         self.driver.quit()
 
 
+    # Raw Data Manipulation
+
+    def date_convertor(self):
+
+        self.df['Date'] = pd.to_datetime(self.df['Date'], format='%d.%m.%Y')
+        return self.df
+
+    def add_day(self,value):
+        if value < pd.Timedelta(days=0):
+            return value + pd.Timedelta(days=1)
+        else:
+            return value
+
+    # delay calculation
+    def delay_calc(self, col3="Estimated_2", col4="Planned_2"):
+        self.df[col3] = pd.to_datetime(self.df['Planned'], format='%H:%M')
+        self.df[col4] = pd.to_datetime(self.df["Estimated"], format='%H:%M')
+        self.df['delay'] = self.df[col4] - self.df[col3]
+        self.df = self.df.drop(columns=[col3, col4])
+        self.df['delay'] = self.df['delay'].apply(self.add_day)
+        return self.df
+
 sc = Scraper(location='frankfurt')
 sc.inject_to_df()
+print(sc.df)
+sc.df.info()
 # sc.quit_driver()
