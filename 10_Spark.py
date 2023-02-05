@@ -41,7 +41,6 @@ SELECT *
 FROM postgres_table
 ORDER BY Date DESC,Planned DESC
 LIMIT 50
-
 """)
 
 unique_rows_df = spark_df.subtract(postgres_df_50)
@@ -50,6 +49,6 @@ unique_rows_df.write.jdbc(url=jdbcUrl,
                      mode="append",
                      properties={"driver": 'org.postgresql.Driver'})
 
-unique_rows_df.show()
+# unique_rows_df.show()
 # postgres_df_50.show()
 # spark_df.show()

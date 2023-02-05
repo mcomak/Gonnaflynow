@@ -11,7 +11,7 @@ pd.options.display.width = None
 
 
 class Scraper:
-    # Global variable to store the driver instance
+    # Global class variable to store the driver instance
     driver = None
 
     @staticmethod
@@ -35,17 +35,32 @@ class Scraper:
         self.driver.switch_to.window(self.driver.window_handles[-1])
         self.driver.get(url)
 
+    # def open_tab(self, url):
+    #     # Check if there is already an open tab with the same URL
+    #     same_url_tab_index = -1
+    #     for i, handle in enumerate(self.driver.window_handles):
+    #         self.driver.switch_to.window(handle)
+    #         if self.driver.current_url == url:
+    #             same_url_tab_index = i
+    #             break
+    #     # If there is no existing tab with the same URL, open a new tab
+    #     if same_url_tab_index == -1:
+    #         self.driver.execute_script("window.open('');")
+    #         self.driver.switch_to.window(self.driver.window_handles[-1])
+    #         self.driver.get(url)
+    #     # If there is an existing tab with the same URL, switch to it
+    #     else:
+    #         self.driver.switch_to.window(self.driver.window_handles[same_url_tab_index])
 
     def open_url(self):
         if self.location == 'istanbul':
-            # self.driver.get('https://www.istairport.com/en/passenger/flight/departure?locale=en')
             self.open_tab('https://www.istairport.com/en/passenger/flight/departure?locale=en')
             button_loc = ""
-            # Accept cookie consent
+            # No cookie acception for istanbul url
         if self.location == 'frankfurt':
-            # self.driver.get('https://www.frankfurt-airport.com/en/flights-and-transfer/departures.html')
             self.open_tab('https://www.frankfurt-airport.com/en/flights-and-transfer/departures.html')
             button_loc = "button[data-testid='uc-accept-all-button'][class='sc-eDvSVe dmPTtj']"
+
             # Accept cookie consent
 
         try:
@@ -177,10 +192,14 @@ class Scraper:
                 elif (i % 9) == 6:
                     self.df.loc[i // 9, "Codeshare"] = value
                 elif (i % 9) == 7:
-                    self.df.loc[i // 9, "Terminal"] = value.split(",")[0]
-                    self.df.loc[i // 9, "Halle"] = value.split(",")[1]
-                    self.df.loc[i // 9, "Gate"] = value.split(",")[2]
-                    self.df.loc[i // 9, "Checkin"] = value.split(",")[3]
+                    try:
+                        # try if value can be splited. If not pass it.
+                        self.df.loc[i // 9, "Terminal"] = value.split(",")[0]
+                        self.df.loc[i // 9, "Halle"] = value.split(",")[1]
+                        self.df.loc[i // 9, "Gate"] = value.split(",")[2]
+                        self.df.loc[i // 9, "Checkin"] = value.split(",")[3]
+                    except:
+                        pass
                 elif (i % 9) == 8:
                     self.df.loc[i // 9, "Click"] = value
             self.df = self.df.drop(columns=['Click'],axis=1)
@@ -224,10 +243,6 @@ class Scraper:
 
 sc = Scraper(location='frankfurt')
 sc.inject_to_df()
-print(sc.df)
 # sc.df.info()
 # sc.quit_driver()
-
-sc = Scraper(location='istanbul')
-sc.inject_to_df()
 print(sc.df)
