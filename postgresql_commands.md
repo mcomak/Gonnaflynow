@@ -1,3 +1,8 @@
+# Check Status
+
+`sudo systemctl status postgresql-10`
+
+# 
 `psql -U train -d traindb`
 
 show tables: `\dt`

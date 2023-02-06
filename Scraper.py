@@ -241,8 +241,8 @@ class Scraper:
         return self.df
 
 
-sc = Scraper(location='frankfurt')
-sc.inject_to_df()
+# sc = Scraper(location='frankfurt')
+# sc.inject_to_df()
 # sc.df.info()
 # sc.quit_driver()
-print(sc.df)
+# print(sc.df)

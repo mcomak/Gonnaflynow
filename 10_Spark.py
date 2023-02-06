@@ -52,3 +52,6 @@ unique_rows_df.write.jdbc(url=jdbcUrl,
 # unique_rows_df.show()
 # postgres_df_50.show()
 # spark_df.show()
+
+sc.quit_driver()
+spark.stop()
