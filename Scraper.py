@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 import pandas as pd
 import time
 from datetime import datetime
+import numpy as np
 
 pd.options.display.max_columns = None
 pd.options.display.width = None
@@ -226,23 +227,39 @@ class Scraper:
             return value
 
 # delay column creating:
+#     def delay_calc(self, col3="Estimated_timedelta", col4="Planned_timedelta"):
+#         # Timedelta columns has created by Planned and Estimated columns
+#         self.df[col3] = pd.to_datetime(self.df['Planned'], format='%H:%M')
+#         self.df[col4] = pd.to_datetime(self.df["Estimated"], format='%H:%M')
+#         # Substracting for Delay time
+#         self.df['Delay'] = (self.df[col3] - self.df[col4])
+#         # Delay time is converting to int as minute from minus
+#         self.df['Delay'] = self.df['Delay'].dt.total_seconds().astype(int) / 60
+#         # If Estimated is earlier than planned, Delay will be negative
+#         self.df.loc[self.df['Delay'] < 0, 'Delay'] = self.df.loc[self.df['Delay'] < 0, 'Delay'] * -1
+#         # Dropping supporting timedelta columns
+#         self.df = self.df.drop(columns=[col3, col4])
+#         return self.df
+
     def delay_calc(self, col3="Estimated_timedelta", col4="Planned_timedelta"):
         # Timedelta columns has created by Planned and Estimated columns
         self.df[col3] = pd.to_datetime(self.df['Planned'], format='%H:%M')
         self.df[col4] = pd.to_datetime(self.df["Estimated"], format='%H:%M')
         # Substracting for Delay time
-        self.df['Delay'] = (self.df[col4] - self.df[col3])
-        # Delay time is converting to int as minute from minus
-        self.df['Delay'] = self.df['Delay'].dt.total_seconds().astype(int) / 60
-        # If Estimated is earlier than planned, Delay will be negative
-        self.df.loc[self.df['Delay'] < 0, 'Delay'] = self.df.loc[self.df['Delay'] < 0, 'Delay'] * -1
+
+        # If Estimated is earlier than Planned, it should be on next day of planned time
+        self.df[col4] = np.where(self.df[col4] < self.df[col3], self.df[col3] + pd.Timedelta(days=1),
+                                   self.df[col3])
+        self.df['Delay'] = ((self.df[col3] - self.df[col4]).dt.total_seconds().astype(int)) / 60
+
         # Dropping supporting timedelta columns
         self.df = self.df.drop(columns=[col3, col4])
         return self.df
 
 
 # sc = Scraper(location='frankfurt')
+# sc = Scraper(location='istanbul')
 # sc.inject_to_df()
-# sc.df.info()
+# sc.df
 # sc.quit_driver()
 # print(sc.df)
