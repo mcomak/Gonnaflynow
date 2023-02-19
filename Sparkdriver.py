@@ -7,11 +7,10 @@ import time
 findspark.init("/opt/manual/spark")
 from pyspark.sql import SparkSession, functions as F
 
-class Spark:
+class Captain_Spark:
 
-    def __init__(self):
-        self.sc = Scraper()
-        self.spark = self.Spark_builder()
+    def __init__(self,location='frankfurt'):
+        self.location = location
     # Spark building
     def Spark_builder(self):
         self.spark = SparkSession.builder \
@@ -20,8 +19,8 @@ class Spark:
             .getOrCreate()
         return self.spark
 
-    def call_scraper(self,location='frankfurt'):
-        sc = Scraper(location=location)
+    def call_scraper(self):
+        sc = Scraper(location=self.location)
         sc.inject_to_df()
         self.spark_df = self.spark.createDataFrame(sc.df)
         return self.spark_df
@@ -65,9 +64,9 @@ class Spark:
         self.spark.stop()
 
 
-# sp = Spark()
-# sp.Spark_builder()
-# sp.call_scraper(location='frankfurt')
+sp = Captain_Spark()
+sp.Spark_builder()
+sp.call_scraper()
 # sp.read_postgres()
 # sp.duplicate_detector()
 # sp.stoper()

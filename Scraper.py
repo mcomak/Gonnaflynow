@@ -36,23 +36,6 @@ class Scraper:
         self.driver.switch_to.window(self.driver.window_handles[-1])
         self.driver.get(url)
 
-    # def open_tab(self, url):
-    #     # Check if there is already an open tab with the same URL
-    #     same_url_tab_index = -1
-    #     for i, handle in enumerate(self.driver.window_handles):
-    #         self.driver.switch_to.window(handle)
-    #         if self.driver.current_url == url:
-    #             same_url_tab_index = i
-    #             break
-    #     # If there is no existing tab with the same URL, open a new tab
-    #     if same_url_tab_index == -1:
-    #         self.driver.execute_script("window.open('');")
-    #         self.driver.switch_to.window(self.driver.window_handles[-1])
-    #         self.driver.get(url)
-    #     # If there is an existing tab with the same URL, switch to it
-    #     else:
-    #         self.driver.switch_to.window(self.driver.window_handles[same_url_tab_index])
-
     def open_url(self):
         if self.location == 'istanbul':
             self.open_tab('https://www.istairport.com/en/passenger/flight/departure?locale=en')

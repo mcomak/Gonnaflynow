@@ -1,0 +1,14 @@
+# Ignore this files:
+01_scratching.py
+02_scratching.py
+03_Bs4.py
+04_selenium.py
+05_istanbul.py
+06_Frankfurt.py
+07_pyshadow.py
+11_delay_calculation.py
+12_classimport.py
+db_conn
+main.py
+postgresql_commands.md
+scrape.html
