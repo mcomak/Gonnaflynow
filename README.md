@@ -41,3 +41,11 @@ Patch v.1.1: Frankfurt and Istanbul web pages has been scraping successfully.
 `psql -U train -W -h localhost sky`
 
 
+# Main python APIs: 
+Scraper.py
+
+Sparkdriver.py
+
+gonnafly_dag.py
+
+
